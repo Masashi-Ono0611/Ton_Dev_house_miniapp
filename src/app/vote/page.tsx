@@ -2,7 +2,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Box, Button, Container, Heading, Stack, Text, HStack, Alert, AlertIcon, Link as CLink, Spinner } from "@chakra-ui/react";
 import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
-import { buildVoteMessage, VoteOption } from "@/lib/ton/vote";
+import { buildVoteMessage, buildResetMessage, VoteOption } from "@/lib/ton/vote";
 import { VOTE_CONTRACT_ADDRESS, VOTE_TOPIC } from "@/lib/ton/constants";
 import { fetchVotes } from "@/lib/ton/dao";
 import { useEffect } from "react";
@@ -84,6 +84,30 @@ export default function VotePage() {
     [connected, tonConnectUI, loadVotes]
   );
 
+  const sendReset = useCallback(async () => {
+    if (!connected) return;
+    const confirm = typeof window !== "undefined" ? window.confirm("Reset all votes to 0? This action cannot be undone.") : true;
+    if (!confirm) return;
+    setSending(true);
+    setResult(null);
+    try {
+      const queryId = Math.floor(Date.now() / 1000);
+      const tx = {
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [buildResetMessage(queryId)],
+      };
+      await tonConnectUI.sendTransaction(tx);
+      setResult(`Reset sent (queryId: ${queryId}).`);
+      setTimeout(() => {
+        loadVotes();
+      }, 4000);
+    } catch (e: any) {
+      setResult(e?.message ?? "Failed to send the transaction");
+    } finally {
+      setSending(false);
+    }
+  }, [connected, tonConnectUI, loadVotes]);
+
   return (
     <Container maxW="lg" py={10}>
       <Stack spacing={6}>
@@ -157,6 +181,16 @@ export default function VotePage() {
             Vote NO
           </Button>
         </HStack>
+
+        <Box borderWidth="1px" borderRadius="md" p={4}>
+          <Heading size="sm" color="red.600" mb={2}>Admin</Heading>
+          <HStack>
+            <Button colorScheme="red" variant="outline" onClick={sendReset} isDisabled={!connected || sending}>
+              Reset Votes
+            </Button>
+            <Text fontSize="xs" color="red.600">Reset all counters to 0 (testnet).</Text>
+          </HStack>
+        </Box>
 
         {result && (
           <Box>
