@@ -21,3 +21,20 @@ export function buildVoteMessage(queryId: number, option: VoteOption) {
     payload: buildVotePayload(queryId, option),
   };
 }
+
+export function buildResetPayload(queryId: number): string {
+  // SimpleDao ResetVotes: opcode(32) = 0xD4E7B328, queryId(32)
+  const cell = beginCell()
+    .storeUint(0xD4E7B328, 32)
+    .storeUint(queryId, 32)
+    .endCell();
+  return cell.toBoc().toString("base64");
+}
+
+export function buildResetMessage(queryId: number) {
+  return {
+    address: VOTE_CONTRACT_ADDRESS,
+    amount: toNano("0.05").toString(),
+    payload: buildResetPayload(queryId),
+  };
+}
