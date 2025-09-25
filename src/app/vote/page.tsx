@@ -17,6 +17,25 @@ export default function VotePage() {
   const [loadingVotes, setLoadingVotes] = useState(false);
   const [votesError, setVotesError] = useState<string | null>(null);
 
+  const { yesCount, noCount, totalCount, yesPct, noPct } = useMemo(() => {
+    const yes = votes?.yes ?? 0;
+    const no = votes?.no ?? 0;
+    const total = votes?.total ?? yes + no; // fallback if contract doesn't return total
+    const safeTotal = total > 0 ? total : yes + no;
+    const base = safeTotal > 0 ? safeTotal : 0;
+    const yp = base > 0 ? Math.round((yes / base) * 100) : 0;
+    const np = base > 0 ? Math.round((no / base) * 100) : 0;
+    // ensure sum doesn't exceed 100 due to rounding
+    const adjust = yp + np > 100 ? (yp + np - 100) : 0;
+    return {
+      yesCount: yes,
+      noCount: no,
+      totalCount: base,
+      yesPct: yp - adjust,
+      noPct: np,
+    };
+  }, [votes]);
+
   const contractLink = useMemo(() => {
     return `https://testnet.tonviewer.com/${VOTE_CONTRACT_ADDRESS}`;
   }, []);
@@ -74,7 +93,7 @@ export default function VotePage() {
 
         <Box borderWidth="1px" borderRadius="md" p={4}>
           <HStack justify="space-between" mb={2}>
-            <Heading size="sm">Current Votes (testnet)</Heading>
+            <Heading size="sm">Current Votes</Heading>
             <Button size="sm" onClick={loadVotes} isLoading={loadingVotes} loadingText="Refreshing">
               Refresh
             </Button>
@@ -91,11 +110,35 @@ export default function VotePage() {
               <Text fontSize="sm">Loading votes...</Text>
             </HStack>
           ) : (
-            <HStack>
-              <Text fontSize="sm">YES: {votes?.yes ?? "-"}</Text>
-              <Text fontSize="sm">NO: {votes?.no ?? "-"}</Text>
-              <Text fontSize="sm">TOTAL: {votes?.total ?? "-"}</Text>
-            </HStack>
+            <Stack spacing={3}>
+              <HStack spacing={4}>
+                <HStack spacing={2}>
+                  <Box w={3} h={3} bg="green.400" borderRadius="sm" />
+                  <Text fontSize="sm">YES: {yesCount} ({yesPct}%)</Text>
+                </HStack>
+                <HStack spacing={2}>
+                  <Box w={3} h={3} bg="red.400" borderRadius="sm" />
+                  <Text fontSize="sm">NO: {noCount} ({noPct}%)</Text>
+                </HStack>
+                <Text fontSize="sm" color="gray.600">TOTAL: {totalCount}</Text>
+              </HStack>
+
+              <Box aria-label="Votes distribution" role="img">
+                <Box
+                  position="relative"
+                  w="100%"
+                  h={4}
+                  bg="gray.100"
+                  borderRadius="md"
+                  overflow="hidden"
+                >
+                  <HStack w="100%" h="100%" spacing={0}>
+                    <Box w={`${yesPct}%`} h="100%" bg="green.400" />
+                    <Box w={`${noPct}%`} h="100%" bg="red.400" />
+                  </HStack>
+                </Box>
+              </Box>
+            </Stack>
           )}
         </Box>
 
