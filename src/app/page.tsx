@@ -1,6 +1,7 @@
 "use client";
 import { Box, Button, Container, Heading, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function HomePage() {
   const [apiInfo, setApiInfo] = useState<string>("");
@@ -19,14 +20,17 @@ export default function HomePage() {
     <Container maxW="lg" py={12}>
       <Stack spacing={6}>
         <Heading size="lg">Next.js + Chakra UI Minimal App</Heading>
-        <Text color="gray.500">
-          これはシンプルなスターターです。Chakra UIのコンポーネントで構築され、APIルートの例を含みます。
-        </Text>
+        <Text color="gray.500">This is a simple starter including an example API route.</Text>
         <Box>
-          <Button colorScheme="teal" onClick={checkVersion}>/api/version を確認</Button>
+          <Button colorScheme="teal" onClick={checkVersion}>Check /api/version</Button>
           {apiInfo && (
             <Text mt={3} fontFamily="mono">{apiInfo}</Text>
           )}
+        </Box>
+        <Box>
+          <Link href={{ pathname: "/vote" }}>
+            <Button colorScheme="blue">Go to Voting</Button>
+          </Link>
         </Box>
       </Stack>
     </Container>
