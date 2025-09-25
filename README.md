@@ -23,7 +23,6 @@
 - `src/app/` App Router 構成
   - `layout.tsx` ルートレイアウト (Chakra UI Provider を適用)
   - `page.tsx` トップページ
-  - `api/version/route.ts` バージョン表示用のAPIエンドポイント例
 - `src/app/_components/ChakraProviders.tsx` Chakra UIのProvider設定
 - `tsconfig.json` TypeScript設定 (JSONのimport対応など)
 - `next.config.mjs` Next.js設定
