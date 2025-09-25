@@ -112,7 +112,7 @@ export default function VotePage() {
     <Container maxW="lg" py={10}>
       <Stack spacing={6}>
         <Heading size="lg">Voting</Heading>
-        <Text color="gray.600">Topic: {VOTE_TOPIC}</Text>
+        <Text color="gray.200" fontSize="md" fontWeight="bold">Topic: {VOTE_TOPIC}</Text>
         <Text color="gray.600">Contract: <CLink href={contractLink} isExternal color="teal.500">{VOTE_CONTRACT_ADDRESS}</CLink></Text>
 
         <Box borderWidth="1px" borderRadius="md" p={4}>
