@@ -13,7 +13,7 @@ export default function VotePage() {
   const connected = !!wallet;
 
   const contractLink = useMemo(() => {
-    return `https://tonviewer.com/${VOTE_CONTRACT_ADDRESS}`;
+    return `https://testnet.tonviewer.com/${VOTE_CONTRACT_ADDRESS}`;
   }, []);
 
   const sendVote = useCallback(

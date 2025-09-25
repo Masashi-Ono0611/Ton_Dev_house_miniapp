@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers, ThemeScript } from "./_components/ChakraProviders";
 import { TonProvider } from "./_components/TonConnectProvider";
+import { TelegramAppProvider } from "./_components/TelegramAppProvider";
 
 export const metadata: Metadata = {
   title: "Next.js Starter",
@@ -18,7 +19,9 @@ export default function RootLayout({
       <body>
         <ThemeScript />
         <Providers>
-          <TonProvider>{children}</TonProvider>
+          <TelegramAppProvider>
+            <TonProvider>{children}</TonProvider>
+          </TelegramAppProvider>
         </Providers>
       </body>
     </html>
