@@ -5,7 +5,7 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <Container maxW="lg" py={12}>
-      <Stack spacing={6}>
+      <Stack gap={6}>
         <Heading size="lg">TON Dev HOUSE Mini App</Heading>
         <Text color="gray.500">made by Masa</Text>
         <Box>

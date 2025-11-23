@@ -1,98 +1,106 @@
-# シンプル Next.js アプリ (App Router)
+# TON Dev HOUSE Mini App (Next.js + Chakra UI)
 
-このプロジェクトは Next.js 14.2.x, React 18.x, TypeScript 5.x, Chakra UI 2.8.x を利用した最小構成のスターターです。
+## Overview
+This is a minimal Telegram Mini App (TMA) built with Next.js (App Router), React, TypeScript, and Chakra UI.
+It integrates TonConnect for wallet connections and interacts with a Simple DAO smart contract on the TON testnet to:
+- Send votes (YES / NO)
+- Display current vote counts
+- Reset votes (admin operation)
 
-## セットアップ
+The app is configured to use Tonviewer for the testnet and fetch on-chain state via TonCenter’s testnet endpoint.
 
-- 依存関係のインストール
-  - npm: `npm install`
-  - pnpm: `pnpm install`
-  - yarn: `yarn`
+## Features
+- Voting UI with TonConnect wallet flow
+- Real-time vote counts fetched from testnet
+- Simple horizontal stacked bar chart for YES/NO distribution
+- Admin-only "Reset Votes" transaction
+- Telegram Mini App ready (WebView embedding + init flow)
+- Chakra UI design with clean defaults
 
-- 開発サーバーの起動 (ポート3000)
-  - npm: `npm run dev`
-  - pnpm: `pnpm run dev`
-  - yarn: `yarn dev`
+## Tech Stack
+- Next.js 14 (App Router)
+- React 18, TypeScript 5
+- Chakra UI 2
+- @tonconnect/ui-react 2.x
+- @ton/ton 15.x, @ton/core
+- Tonviewer (testnet) links
 
-- ビルドと起動
-  - `npm run build` / `pnpm run build` / `yarn build`
-  - `npm start` / `pnpm start` / `yarn start`
+## Project Structure
+- `src/app/layout.tsx`: Root layout, wraps Chakra Provider, TelegramAppProvider, and TonConnect Provider
+- `src/app/page.tsx`: Home page (minimal navigation to voting)
+- `src/app/vote/page.tsx`: Voting page (vote, view counts, reset)
+- `src/app/_components/ChakraProviders.tsx`: Chakra UI theme/provider
+- `src/app/_components/TonConnectProvider.tsx`: TonConnect UI provider + button
+- `src/app/_components/TelegramAppProvider.tsx`: Telegram WebApp init and dev mock
+- `src/lib/ton/constants.ts`: Contract address and topic text
+- `src/lib/ton/vote.ts`: Vote/reset payload builders
+- `src/lib/ton/dao.ts`: Fetch votes from contract via TonCenter
 
-## 構成
+## Getting Started
+1) Install dependencies
+- npm: `npm install`
+- pnpm: `pnpm install`
+- yarn: `yarn`
 
-- `src/app/` App Router 構成
-  - `layout.tsx` ルートレイアウト (Chakra UI Provider を適用)
-  - `page.tsx` トップページ
-- `src/app/_components/ChakraProviders.tsx` Chakra UIのProvider設定
-- `tsconfig.json` TypeScript設定 (JSONのimport対応など)
-- `next.config.mjs` Next.js設定
+2) Development
+- `npm run dev` (port 3000)
+- Open `http://localhost:3000`
 
-## 備考
+3) Production-like
+- `npm run build`
+- `npm start` (port 3000)
 
-- コード内のコメント・ログは英語、READMEなどのドキュメントは日本語方針です。
-- .env は作成していません。必要になった場合は `.env.example` を追加してください。
+## Environment Variables (optional)
+- `NEXT_PUBLIC_TONCENTER_API_URL` (default: `https://testnet.toncenter.com/api/v2/jsonRPC`)
+- `NEXT_PUBLIC_TONCENTER_API_KEY` (recommended for higher rate limits)
+- Consider adding an `.env.example` and avoid committing secrets.
 
-## Telegram Mini App 対応
+## Telegram Mini App
+- The app is designed to run inside Telegram WebView.
+- In development, `TelegramAppProvider` provides a lightweight mock for local browser testing.
+- For real TMA testing:
+  1) Build and start the app
+     ```bash
+     pnpm run build
+     pnpm start
+     ```
+  2) Expose via ngrok
+     ```bash
+     ngrok http 3000
+     ```
+  3) Register the ngrok URL as the WebApp URL in BotFather
+  4) Open the bot in Telegram and launch the Mini App
 
-- 本番環境では Telegram WebView 内でのみ動作します。ブラウザ直開きは非対応です（トップページに警告を表示）。
-- 開発環境（`NODE_ENV=development`）では、`TelegramAppProvider` がモックを有効化し、ローカルブラウザでも最低限の動作確認が可能です。
+## TonConnect
+- Integrated via `TonConnectUIProvider` in `src/app/_components/TonConnectProvider.tsx`
+- A `TonConnectButton` is available in the header for wallet connect and transactions
 
-### 1. ファイル構成の要点
+## Voting Page
+- Contract: `VOTE_CONTRACT_ADDRESS` in `src/lib/ton/constants.ts`
+- Topic text: `VOTE_TOPIC` in `src/lib/ton/constants.ts`
+- Vote sending uses `buildVoteMessage(queryId, option)`
+- Current votes fetched by `fetchVotes(address)` from `src/lib/ton/dao.ts`
+- Chart: simple horizontal stacked bar (YES=green / NO=red) with percentage labels
 
-- `src/app/_components/TelegramAppProvider.tsx`
-  - Telegram WebApp の `window.Telegram.WebApp` を検出して `ready()/expand()` を実行
-  - 開発時のみモック initData を提供
-- `src/app/_components/TonConnectProvider.tsx`
-  - `TonConnectUIProvider` と `TonConnectButton` を提供
-- `src/app/layout.tsx`
-  - `TelegramAppProvider` の内側に `TonProvider` をネスト
-- `next.config.mjs`
-  - Telegram WebView での埋め込みを許可する `Content-Security-Policy` / `X-Frame-Options`
+## Admin: Reset Votes
+- "Reset Votes" button sends an admin-only reset transaction
+- Opcode: `0xD4E7B328`, amount: `toNano("0.05")`
+- Built via `buildResetMessage(queryId)` in `src/lib/ton/vote.ts`
+- UI triggers a confirmation and refreshes counts after success
+- Admin authorization is enforced by the smart contract
 
-### 2. BotFather 設定（本番/検証）
+## Testnet Explorer
+- Contract link base: `https://testnet.tonviewer.com/`
 
-- BotFather の主なコマンド
-  - `/newbot` で Bot を作成（トークン取得）
-  - `/setwebapp` で Mini App の URL を登録（または `/setdomain`）
-  - `/setmenu` でメニューに Web App を配置（任意）
-- WebApp URL は `https://<your-domain>/` を指定
-
-### 3. ngrok を使った Telegram クライアント検証
-
-1) プロダクション相当で起動
-
-```bash
-pnpm run build
-pnpm start
-```
-
-2) ngrok でポート3000を公開（別ターミナルで）
-
-```bash
-ngrok http 3000
-```
-
-3) 表示された `https://<your-ngrok>.ngrok-free.app` を WebApp URL に設定（BotFather）
-
-4) Telegram クライアントで Bot を開き、Mini App を起動
-
-※ 開発サーバー（`pnpm dev`）はホットリロード向けで、WebView の挙動が異なる場合があります。本番同等の確認は `start` 推奨。
-
-### 4. 環境変数・設定
-
-- `.env` に `WEB_URL` 等が必要な場合は追加してください（本リポジトリは未作成）。
-- `.env` を直接上書きせず、`.env.example` を整備してチーム運用してください。
-
-### 5. セキュリティヘッダー
-
-- `next.config.mjs` に以下を設定済み
-  - `Content-Security-Policy`: `frame-ancestors` に Telegram ドメインを許可、最低限の `script/style/img/connect` を許可
+## Security Headers
+- `next.config.mjs` sets:
+  - `Content-Security-Policy` with `frame-ancestors` for Telegram WebView
   - `X-Frame-Options: ALLOW-FROM https://web.telegram.org`
-- 必要に応じて `connect-src` に TON 関連 API / RPC を追記してください。
+- Extend `connect-src` for external APIs or TON RPC endpoints as needed.
 
-### 6. 動作確認ポイント
-
-- `src/app/page.tsx` で以下を表示
-  - `isTMA`（Telegram内か判定）
-  - `initData.user.id` / `initData.user.username`
-- Telegram 内でユーザー情報が表示されれば OK です。
+## Scripts
+- `dev`: Next.js dev server on port 3000
+- `build`: Production build
+- `start`: Start production server on port 3000
+- `lint`: ESLint
+- `type-check`: TypeScript type check

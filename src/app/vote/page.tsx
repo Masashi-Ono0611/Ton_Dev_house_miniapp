@@ -1,6 +1,6 @@
 "use client";
 import React, { useCallback, useMemo, useState } from "react";
-import { Box, Button, Container, Heading, Stack, Text, HStack, Alert, AlertIcon, Link as CLink, Spinner } from "@chakra-ui/react";
+import { Box, Button, Container, Heading, Stack, Text, HStack, Alert, Link as CLink, Spinner } from "@chakra-ui/react";
 import { useTonConnectUI, useTonWallet } from "@tonconnect/ui-react";
 import { buildVoteMessage, buildResetMessage, VoteOption } from "@/lib/ton/vote";
 import { VOTE_CONTRACT_ADDRESS, VOTE_TOPIC } from "@/lib/ton/constants";
@@ -110,23 +110,23 @@ export default function VotePage() {
 
   return (
     <Container maxW="lg" py={10}>
-      <Stack spacing={6}>
+      <Stack gap={6}>
         <Heading size="lg">Voting</Heading>
         <Text color="gray.200" fontSize="md" fontWeight="bold">Topic: {VOTE_TOPIC}</Text>
-        <Text color="gray.600">Contract: <CLink href={contractLink} isExternal color="teal.500">{VOTE_CONTRACT_ADDRESS}</CLink></Text>
+        <Text color="gray.600">Contract: <CLink href={contractLink} target="_blank" rel="noopener noreferrer" color="teal.500">{VOTE_CONTRACT_ADDRESS}</CLink></Text>
 
         <Box borderWidth="1px" borderRadius="md" p={4}>
           <HStack justify="space-between" mb={2}>
             <Heading size="sm">Current Votes</Heading>
-            <Button size="sm" onClick={loadVotes} isLoading={loadingVotes} loadingText="Refreshing">
+            <Button size="sm" onClick={loadVotes} loading={loadingVotes} loadingText="Refreshing">
               Refresh
             </Button>
           </HStack>
           {votesError && (
-            <Alert status="error" mb={2}>
-              <AlertIcon />
-              {votesError}
-            </Alert>
+            <Alert.Root status="error" mb={2}>
+              <Alert.Indicator />
+              <Alert.Title>{votesError}</Alert.Title>
+            </Alert.Root>
           )}
           {loadingVotes && !votes ? (
             <HStack>
@@ -134,13 +134,13 @@ export default function VotePage() {
               <Text fontSize="sm">Loading votes...</Text>
             </HStack>
           ) : (
-            <Stack spacing={3}>
-              <HStack spacing={4}>
-                <HStack spacing={2}>
+            <Stack gap={3}>
+              <HStack gap={4}>
+                <HStack gap={2}>
                   <Box w={3} h={3} bg="green.400" borderRadius="sm" />
                   <Text fontSize="sm">YES: {yesCount} ({yesPct}%)</Text>
                 </HStack>
-                <HStack spacing={2}>
+                <HStack gap={2}>
                   <Box w={3} h={3} bg="red.400" borderRadius="sm" />
                   <Text fontSize="sm">NO: {noCount} ({noPct}%)</Text>
                 </HStack>
@@ -156,7 +156,7 @@ export default function VotePage() {
                   borderRadius="md"
                   overflow="hidden"
                 >
-                  <HStack w="100%" h="100%" spacing={0}>
+                  <HStack w="100%" h="100%" gap={0}>
                     <Box w={`${yesPct}%`} h="100%" bg="green.400" />
                     <Box w={`${noPct}%`} h="100%" bg="red.400" />
                   </HStack>
@@ -167,17 +167,17 @@ export default function VotePage() {
         </Box>
 
         {!connected && (
-          <Alert status="info">
-            <AlertIcon />
-            Connect your wallet to vote.
-          </Alert>
+          <Alert.Root status="info">
+            <Alert.Indicator />
+            <Alert.Title>Connect your wallet to vote.</Alert.Title>
+          </Alert.Root>
         )}
 
         <HStack>
-          <Button colorScheme="green" onClick={() => sendVote("yes")} isDisabled={!connected || sending}>
+          <Button colorScheme="green" onClick={() => sendVote("yes")} disabled={!connected || sending}>
             Vote YES
           </Button>
-          <Button colorScheme="red" onClick={() => sendVote("no")} isDisabled={!connected || sending}>
+          <Button colorScheme="red" onClick={() => sendVote("no")} disabled={!connected || sending}>
             Vote NO
           </Button>
         </HStack>
@@ -185,7 +185,7 @@ export default function VotePage() {
         <Box borderWidth="1px" borderRadius="md" p={4}>
           <Heading size="sm" color="red.600" mb={2}>Admin</Heading>
           <HStack>
-            <Button colorScheme="red" variant="outline" onClick={sendReset} isDisabled={!connected || sending}>
+            <Button colorScheme="red" variant="outline" onClick={sendReset} disabled={!connected || sending}>
               Reset Votes
             </Button>
             <Text fontSize="xs" color="red.600">Reset all counters to 0 (testnet).</Text>
@@ -196,7 +196,7 @@ export default function VotePage() {
           <Box>
             <Text>{result}</Text>
             <Text>
-              You can verify on <CLink href={contractLink} isExternal color="teal.500">Tonviewer</CLink>.
+              You can verify on <CLink href={contractLink} target="_blank" rel="noopener noreferrer" color="teal.500">Tonviewer</CLink>.
             </Text>
           </Box>
         )}
